@@ -1,8 +1,68 @@
-/*
+/* PDF Outline View Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.pdf-outline-empty {
+	padding: 20px;
+	text-align: center;
+	color: var(--text-muted);
+	font-style: italic;
+}
 
-If your plugin does not need CSS, delete this file.
+/* Header with search and toggle button */
+.pdf-outline-header {
+	padding: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
 
-*/
+.pdf-outline-search {
+	position: relative;
+	flex: 1;
+}
+
+.pdf-outline-search-input {
+	width: 100%;
+	padding: 6px 28px 6px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	color: var(--text-normal);
+	font-size: 14px;
+}
+
+.pdf-outline-search-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 2px var(--background-modifier-border);
+}
+
+.pdf-outline-search-icon {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--text-muted);
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+}
+
+.pdf-outline-search-icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.pdf-outline-toggle-all {
+	padding: 6px 12px;
+	white-space: nowrap;
+	font-size: 13px;
+}
+
+.pdf-outline-content {
+	flex: 1;
+	overflow-y: auto;
+}
+
+/* Use Obsidian's native tree-item styles - no custom styles needed as we use native classes */
+/* The tree-item structure will automatically use Obsidian's built-in styling */

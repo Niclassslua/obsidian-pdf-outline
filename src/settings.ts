@@ -1,36 +1,29 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import PDFOutlinePlugin from './main';
 
-export interface MyPluginSettings {
-	mySetting: string;
+export interface PDFOutlinePluginSettings {
+	// Placeholder for future settings
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+export const DEFAULT_SETTINGS: PDFOutlinePluginSettings = {};
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class PDFOutlineSettingTab extends PluginSettingTab {
+	plugin: PDFOutlinePlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: PDFOutlinePlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
+		containerEl.createEl('h2', { text: 'PDF Outline Settings' });
+
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName('About')
+			.setDesc('This plugin automatically displays the outline (table of contents) of PDF files in the right sidebar. Open a PDF file to see its outline.');
 	}
 }
