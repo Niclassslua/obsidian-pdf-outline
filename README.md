@@ -1,90 +1,234 @@
-# Obsidian Sample Plugin
+# PDF Outline Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+An Obsidian plugin that displays PDF outlines (table of contents) in a sidebar view, allowing users to navigate through PDF documents efficiently.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+### Core Functionality
 
-## First time developing plugins?
+- **Automatic PDF Outline Detection**: Automatically detects when a PDF file is opened and parses its outline structure
+- **Sidebar View**: Displays the outline in a dedicated sidebar tab that matches Obsidian's native outline appearance
+- **Collapsible Tree Structure**: Hierarchical outline with expand/collapse functionality for nested sections
+- **Page Navigation**: Click on any outline item to jump to the corresponding page in the PDF viewer
 
-Quick starting guide for new plugin devs:
+### Advanced Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **Search Functionality**: Real-time filtering of outline items by title
+  - Case-insensitive search
+  - Recursive filtering (shows parent items if children match)
+  - Instant results as you type
 
-## Releasing new releases
+- **Expand/Collapse All**: Toggle button to expand or collapse all outline sections at once
+  - Button text dynamically changes based on current state
+  - Works with filtered search results
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+## Technical Implementation
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+### Architecture
 
-## Adding your plugin to the community plugin list
+The plugin is built using TypeScript and follows Obsidian's plugin development best practices:
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```
+src/
+  main.ts          # Plugin lifecycle, view registration, event listeners
+  view.ts          # PDFOutlineView class implementing ItemView
+  pdf-parser.ts    # PDF outline parsing using PDF.js
+  types.ts         # TypeScript interfaces for outline structure
+  settings.ts      # Plugin settings configuration
 ```
 
-If you have multiple URLs, you can also do:
+### Key Components
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+#### 1. PDF Parsing (`src/pdf-parser.ts`)
+
+- **PDF.js Integration**: Uses Obsidian's built-in `loadPdfJs()` function to ensure compatibility and proper worker configuration
+- **Outline Extraction**: Recursively parses PDF outline structure using PDF.js `getOutline()` API
+- **Destination Resolution**: Resolves PDF destinations to page numbers for navigation
+- **Error Handling**: Comprehensive error handling with fallbacks
+
+**Key Functions:**
+- `parsePDFOutline()`: Main function that loads PDF and extracts outline
+- `convertOutlineItemAsync()`: Recursively converts PDF.js outline items to our structure
+- `resolveDestination()`: Resolves PDF destinations to page numbers
+
+#### 2. View Implementation (`src/view.ts`)
+
+- **ItemView Extension**: Extends Obsidian's `ItemView` class for sidebar integration
+- **Tree Structure**: Uses Obsidian's native `tree-item` CSS classes for consistent UI
+- **State Management**: Tracks expand/collapse state of all outline items
+- **Search Filtering**: Real-time filtering with recursive matching
+
+**Key Features:**
+- `displayOutline()`: Updates view with new outline data
+- `renderOutlineItems()`: Recursively renders outline as collapsible tree
+- `filterOutline()`: Filters outline items based on search query
+- `toggleItem()`: Handles individual item expand/collapse
+- `toggleAll()`: Expands or collapses all items
+- `jumpToPage()`: Navigates to PDF page when outline item is clicked
+
+#### 3. Plugin Main (`src/main.ts`)
+
+- **View Registration**: Registers the PDF Outline view with Obsidian
+- **Event Listeners**: Listens for file-open events to detect PDF files
+- **Automatic Updates**: Updates outline when PDF files are opened or switched
+
+**Key Functionality:**
+- Registers view in right sidebar on plugin load
+- Monitors file-open events for PDF files
+- Automatically parses and displays outline when PDF is opened
+
+### UI/UX Design
+
+#### Visual Consistency
+
+- **Native Obsidian Styling**: Uses Obsidian's built-in CSS classes (`tree-item`, `tree-item-self`, etc.) for seamless integration
+- **Collapsible Icons**: SVG icons matching Obsidian's native outline appearance
+- **Responsive Layout**: Header with search and controls, scrollable content area
+
+#### User Interface Elements
+
+1. **Search Input**: 
+   - Positioned at top of view
+   - Search icon for visual clarity
+   - Real-time filtering as user types
+
+2. **Toggle All Button**:
+   - Located next to search input
+   - Text changes based on state ("Alles einklappen" / "Alles ausklappen")
+   - Uses Obsidian's `mod-cta` class for consistent button styling
+
+3. **Outline Tree**:
+   - Hierarchical structure with proper indentation
+   - Collapse icons for items with children
+   - Page numbers displayed as tags
+   - Clickable items for navigation
+
+### PDF Navigation
+
+The plugin implements multiple navigation methods to ensure compatibility:
+
+1. **Primary Methods**:
+   - `goToPage()`: Most common PDF viewer method
+   - `jumpToPage()`: Alternative navigation method
+   - `navigateToPage()`: Additional fallback
+
+2. **Internal API Access**:
+   - Direct access to PDF.js viewer instance
+   - Page number manipulation via `currentPageNumber`
+
+3. **DOM Manipulation**:
+   - Fallback to DOM-based navigation if APIs unavailable
+   - Input field manipulation for page navigation
+
+### Error Handling
+
+- **Graceful Degradation**: Falls back to page-based navigation if destination-based navigation fails
+- **Console Logging**: Debug information for troubleshooting
+- **Empty States**: User-friendly messages when no outline is available or search returns no results
+
+## Installation
+
+### Development Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/Niclassslua/obsidian-pdf-outline.git
+cd obsidian-pdf-outline
 ```
 
-## API Documentation
+2. Install dependencies:
+```bash
+npm install
+```
 
-See https://docs.obsidian.md
+3. Build the plugin:
+```bash
+npm run build
+```
+
+4. For development with watch mode:
+```bash
+npm run dev
+```
+
+### Manual Installation
+
+1. Copy `main.js`, `manifest.json`, and `styles.css` to your vault's `.obsidian/plugins/obsidian-pdf-outline/` folder
+2. Reload Obsidian
+3. Enable the plugin in Settings → Community plugins
+
+## Usage
+
+1. **Open a PDF file** in Obsidian
+2. The **PDF Outline** tab will automatically appear in the right sidebar
+3. **Click any outline item** to navigate to that section in the PDF
+4. **Use the search box** to filter outline items
+5. **Click "Alles einklappen/ausklappen"** to collapse or expand all sections
+
+## Technical Details
+
+### Dependencies
+
+- **obsidian**: Latest Obsidian API
+- **pdfjs-dist**: ^3.11.174 (loaded via Obsidian's `loadPdfJs()`)
+
+### Browser Compatibility
+
+- Uses Obsidian's built-in PDF.js loading mechanism
+- No external CDN dependencies
+- Worker configuration handled automatically by Obsidian
+
+### TypeScript Configuration
+
+- Strict type checking enabled
+- ES2018 target for compatibility
+- Module resolution: Node
+
+## Development
+
+### Project Structure
+
+```
+obsidian-pdf-outline/
+├── src/
+│   ├── main.ts          # Plugin entry point
+│   ├── view.ts          # Sidebar view implementation
+│   ├── pdf-parser.ts    # PDF parsing logic
+│   ├── types.ts         # TypeScript definitions
+│   └── settings.ts      # Settings tab
+├── styles.css           # Custom styles
+├── manifest.json        # Plugin manifest
+├── package.json         # Dependencies
+└── tsconfig.json        # TypeScript config
+```
+
+### Building
+
+```bash
+# Development build with watch mode
+npm run dev
+
+# Production build
+npm run build
+
+# Type checking
+npm run lint
+```
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+- Code follows TypeScript best practices
+- New features include proper error handling
+- UI matches Obsidian's native design patterns
+- All changes are tested before submitting
+
+## License
+
+See LICENSE file for details.
+
+## Acknowledgments
+
+- Built using the [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin) as a template
+- Uses PDF.js for PDF parsing (loaded via Obsidian's API)
+- Follows Obsidian's plugin development guidelines
