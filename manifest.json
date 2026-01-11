@@ -4,6 +4,7 @@
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Displays PDF outlines (table of contents) in a sidebar view. Automatically shows the outline when a PDF file is opened.",
-	"author": "",
+	"author": "Niclassslua",
+	"authorUrl": "",
 	"isDesktopOnly": false
 }
